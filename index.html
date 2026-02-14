@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Forever Valentine 💖</title>
+<style>
+body{
+ margin:0;
+ background: linear-gradient(to bottom, #8B0000, #FF1493); /* romantic red to pink */
+ overflow:hidden;
+ font-family:Arial;
+ color:#00ff88;
+ text-align:center;
+ cursor:default;
+ transition: background 1s;
+}
+
+#lockScreen,#mainContent{
+ position:absolute;
+ width:100%;
+ height:100%;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ padding:10px;
+ box-sizing:border-box;
+}
+
+#mainContent{display:none;}
+
+input,button{
+ padding:8px;
+ font-size:16px;
+ margin:6px;
+ border-radius:8px;
+ border:none;
+ max-width:90%;
+}
+
+button{
+ background:#00ff88;
+ color:black;
+ cursor:pointer;
+}
+
+.pulse{
+ animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+ 0%{transform:scale(1);}
+ 50%{transform:scale(1.2);}
+ 100%{transform:scale(1);}
+}
+
+.glow{
+ font-size:45px;
+ text-shadow:0 0 15px #00ff88;
+ animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+ from{ text-shadow:0 0 8px #00ff88;}
+ to{ text-shadow:0 0 30px #00ff88;}
+}
+
+.gallery{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+}
+.gallery img{
+ width:100px;
+ height:100px;
+ margin:4px;
+ border-radius:8px;
+}
+
+#nameReveal{
+ font-size:30px;
+ opacity:0;
+ transition:opacity 2s;
+ word-break:break-word;
+}
+
+#typing{
+ font-size:18px;
+ width:90%;
+ min-height:80px;
+ margin:10px auto;
+}
+
+canvas{
+ position:fixed;
+ top:0;
+ left:0;
+ pointer-events:none;
+ z-index:0;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width:600px){
+ .glow{font-size:35px;}
+ #nameReveal{font-size:24px;}
+ #typing{font-size:16px;}
+ button,input{font-size:14px;padding:6px;}
+ .gallery img{width:80px;height:80px;}
+}
+</style>
+</head>
+
+<body>
+
+<div id="lockScreen">
+<h1>Enter Password 💖</h1>
+<input id="pass" type="password" placeholder="Password">
+<button onclick="unlock()">Unlock</button>
+</div>
+
+<div id="mainContent">
+
+<div class="glow pulse">🌹</div>
+
+<h2 id="countdown"></h2>
+
+<div id="typing"></div>
+
+<h1 id="nameReveal">Lesedi 💖</h1>
+
+<h3>Romantic Poem</h3>
+<p>
+You are my emerald flame,<br>
+My heart whispers your name.<br>
+Through every dream we share,<br>
+Forever us — beyond compare. 💖
+</p>
+
+<h2>Will you be my forever Valentine?</h2>
+
+<div class="gallery">
+<img src="photo1.jpg">
+<img src="photo2.jpg">
+<img src="photo3.jpg">
+</div>
+
+<button onclick="heartExplosion()">Heart Explosion 💖</button>
+<button onclick="playVoice()">Secret Message 🎵</button>
+<button onclick="replay()">Replay Surprise</button>
+
+</div>
+
+<audio id="music" src="poison.mp3" loop></audio>
+<audio id="voice" src="voice.mp3"></audio>
+
+<canvas id="effects"></canvas>
+
+<script>
+/* -------------------
+    PASSWORD + UNLOCK
+------------------- */
+function unlock(){
+ if(document.getElementById("pass").value==="Sae+Hau"){
+  document.getElementById("lockScreen").style.display="none";
+  document.getElementById("mainContent").style.display="flex";
+  startTyping();
+  fadeMusic();
+  startAudioVisualizer();
+  chorusGlow();
+  revealName();
+ }
+}
+
+/* MUSIC FADE-IN */
+function fadeMusic(){
+ let m=document.getElementById("music");
+ m.volume=0;
+ m.play();
+ let fade=setInterval(()=>{
+  if(m.volume<1) m.volume+=0.02;
+  else clearInterval(fade);
+ },100);
+}
+
+/* COUNTDOWN */
+let countdownDate=new Date("Feb 14, 2026 23:59:59").getTime();
+setInterval(()=>{
+ let now=new Date().getTime();
+ let diff=countdownDate-now;
+ let days=Math.floor(diff/(1000*60*60*24));
+ document.getElementById("countdown").innerHTML="Countdown: "+days+" days 💖";
+},1000);
+
+/* TYPING MESSAGE */
+let msg="My love, every second with you feels like magic. You are my heart, my peace, my forever. 💖";
+let i=0;
+function startTyping(){
+ let t=setInterval(()=>{
+  document.getElementById("typing").innerHTML+=msg[i];
+  i++;
+  if(i>=msg.length) clearInterval(t);
+ },50);
+}
+
+/* NAME REVEAL */
+function revealName(){
+ setTimeout(()=>{
+  document.getElementById("nameReveal").style.opacity=1;
+ },8000);
+}
+
+/* CHORUS GLOW FLASH */
+function chorusGlow(){
+ setInterval(()=>{
+  document.body.style.background="#FF69B4"; // hot pink flash
+  setTimeout(()=>document.body.style.background="linear-gradient(to bottom, #8B0000, #FF1493)",800);
+ },15000);
+}
+
+/* -------------------
+    PARTICLES & HEARTS
+------------------- */
+const canvas=document.getElementById("effects");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+/* Resize canvas on window change */
+window.addEventListener("resize",()=>{
+ canvas.width = window.innerWidth;
+ canvas.height = window.innerHeight;
+});
+
+/* spawn normal particles */
+function spawnParticle(){
+ particles.push({
+  x:Math.random()*canvas.width,
+  y:Math.random()*canvas.height,
+  size:Math.random()*3+1,
+  speed:Math.random()*1+0.5
+ });
+}
+
+/* draw particles */
+function drawParticles(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ for(let p of particles){
+  ctx.fillStyle="#00ff88";
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+  ctx.fill();
+  p.y+=p.speed;
+  if(p.y>canvas.height) p.y=0;
+ }
+ requestAnimationFrame(drawParticles);
+}
+setInterval(spawnParticle,40);
+drawParticles();
+
+/* HEART EXPLOSION */
+function heartExplosion(){
+ for(let i=0;i<120;i++){
+  particles.push({
+   x:canvas.width/2,
+   y:canvas.height/2,
+   size:3,
+   speed:Math.random()*5
+  });
+ }
+}
+
+/* FIREWORKS SYNCED TO CHORUS */
+let lastFirework = 0;
+function fireworkSync(avg){
+    let now = Date.now();
+    if(avg > 180 && now - lastFirework > 2000){
+        lastFirework = now;
+        for(let i=0;i<40;i++){
+            particles.push({
+                x:Math.random()*canvas.width,
+                y:Math.random()*canvas.height/2,
+                size:2 + Math.random()*2,
+                speed:Math.random()*5
+            });
+        }
+    }
+}
+
+/* SECRET VOICE */
+function playVoice(){
+ document.getElementById("voice").play();
+}
+
+/* REPLAY */
+function replay(){
+ location.reload();
+}
+
+/* -------------------
+    AUDIO VISUALIZER
+------------------- */
+let audioCtx, analyser, source, dataArray;
+function startAudioVisualizer(){
+ let audio = document.getElementById("music");
+ audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+ source = audioCtx.createMediaElementSource(audio);
+ analyser = audioCtx.createAnalyser();
+ source.connect(analyser);
+ analyser.connect(audioCtx.destination);
+ analyser.fftSize = 256;
+ let bufferLength = analyser.frequencyBinCount;
+ dataArray = new Uint8Array(bufferLength);
+
+ function animateBeat(){
+  requestAnimationFrame(animateBeat);
+  analyser.getByteFrequencyData(dataArray);
+  let avg = dataArray.reduce((a,b)=>a+b,0)/dataArray.length;
+
+  // Pulse rose and glow
+  document.querySelector(".glow").style.transform = `scale(${1 + avg/400})`;
+
+  // Scale heart particles
+  particles.forEach(p=>{
+   p.size = 2 + avg/100;
+  });
+
+  // Text glow
+  let glowVal = Math.min(avg/50,1);
+  document.getElementById("typing").style.textShadow=`0 0 ${glowVal*20}px #00ff88`;
+  document.getElementById("nameReveal").style.textShadow=`0 0 ${glowVal*25}px #00ff88`;
+
+  // Fireworks synced to chorus
+  fireworkSync(avg);
+ }
+
+ animateBeat();
+}
+
+/* -------------------
+    MOUSE HEART TRAILS
+------------------- */
+document.addEventListener("mousemove",(e)=>{
+ for(let i=0;i<2;i++){
+  particles.push({
+   x:e.clientX + (Math.random()*20-10),
+   y:e.clientY + (Math.random()*20-10),
+   size:Math.random()*3+1,
+   speed:0
+  });
+ }
+});
+
+/* CLICK SPARKLES */
+document.addEventListener("click",(e)=>{
+ for(let i=0;i<15;i++){
+  particles.push({
+   x:e.clientX + (Math.random()*30-15),
+   y:e.clientY + (Math.random()*30-15),
+   size:Math.random()*3+1,
+   speed:Math.random()*1+0.5
+  });
+ }
+});
+</script>
+</body>
+</html>
